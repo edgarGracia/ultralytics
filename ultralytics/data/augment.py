@@ -5,6 +5,7 @@ import random
 from copy import deepcopy
 from typing import Tuple, Union
 
+import albumentations as A
 import cv2
 import numpy as np
 import torch
@@ -17,6 +18,8 @@ from ultralytics.utils.instance import Instances
 from ultralytics.utils.metrics import bbox_ioa
 from ultralytics.utils.ops import segment2box, xyxyxyxy2xywhr
 from ultralytics.utils.torch_utils import TORCHVISION_0_10, TORCHVISION_0_11, TORCHVISION_0_13
+
+check_version(A.__version__, "1.0.3", hard=True)  # version requirement
 
 DEFAULT_MEAN = (0.0, 0.0, 0.0)
 DEFAULT_STD = (1.0, 1.0, 1.0)
@@ -1755,7 +1758,14 @@ class Albumentations:
         - Spatial transforms are handled differently and require special processing for bounding boxes.
     """
 
-    def __init__(self, p=1.0):
+    def __init__(
+        self,
+        p=1.0,
+        blur_p: float = 0.01,
+        blur_limit: tuple = (3, 7),
+        median_blur: float = 0.01,
+        median_blur_limit: float = 7,
+    ):
         """
         Initialize the Albumentations transform object for YOLO bbox formatted parameters.
 
@@ -1790,78 +1800,69 @@ class Albumentations:
         self.transform = None
         prefix = colorstr("albumentations: ")
 
-        try:
-            import albumentations as A
+        # List of possible spatial transforms
+        spatial_transforms = {
+            "Affine",
+            "BBoxSafeRandomCrop",
+            "CenterCrop",
+            "CoarseDropout",
+            "Crop",
+            "CropAndPad",
+            "CropNonEmptyMaskIfExists",
+            "D4",
+            "ElasticTransform",
+            "Flip",
+            "GridDistortion",
+            "GridDropout",
+            "HorizontalFlip",
+            "Lambda",
+            "LongestMaxSize",
+            "MaskDropout",
+            "MixUp",
+            "Morphological",
+            "NoOp",
+            "OpticalDistortion",
+            "PadIfNeeded",
+            "Perspective",
+            "PiecewiseAffine",
+            "PixelDropout",
+            "RandomCrop",
+            "RandomCropFromBorders",
+            "RandomGridShuffle",
+            "RandomResizedCrop",
+            "RandomRotate90",
+            "RandomScale",
+            "RandomSizedBBoxSafeCrop",
+            "RandomSizedCrop",
+            "Resize",
+            "Rotate",
+            "SafeRotate",
+            "ShiftScaleRotate",
+            "SmallestMaxSize",
+            "Transpose",
+            "VerticalFlip",
+            "XYMasking",
+        }  # from https://albumentations.ai/docs/getting_started/transforms_and_targets/#spatial-level-transforms
 
-            check_version(A.__version__, "1.0.3", hard=True)  # version requirement
+        # Transforms
+        T = [
+            A.Blur(blur_limit=blur_limit, p=blur_p),
+            A.MedianBlur(blur_limit=median_blur_limit, p=median_blur),
+            A.ToGray(p=0.01),
+            A.CLAHE(p=0.01),
+            A.RandomBrightnessContrast(p=0.0),
+            A.RandomGamma(p=0.0),
+            A.ImageCompression(quality_lower=75, p=0.0),
+        ]
 
-            # List of possible spatial transforms
-            spatial_transforms = {
-                "Affine",
-                "BBoxSafeRandomCrop",
-                "CenterCrop",
-                "CoarseDropout",
-                "Crop",
-                "CropAndPad",
-                "CropNonEmptyMaskIfExists",
-                "D4",
-                "ElasticTransform",
-                "Flip",
-                "GridDistortion",
-                "GridDropout",
-                "HorizontalFlip",
-                "Lambda",
-                "LongestMaxSize",
-                "MaskDropout",
-                "MixUp",
-                "Morphological",
-                "NoOp",
-                "OpticalDistortion",
-                "PadIfNeeded",
-                "Perspective",
-                "PiecewiseAffine",
-                "PixelDropout",
-                "RandomCrop",
-                "RandomCropFromBorders",
-                "RandomGridShuffle",
-                "RandomResizedCrop",
-                "RandomRotate90",
-                "RandomScale",
-                "RandomSizedBBoxSafeCrop",
-                "RandomSizedCrop",
-                "Resize",
-                "Rotate",
-                "SafeRotate",
-                "ShiftScaleRotate",
-                "SmallestMaxSize",
-                "Transpose",
-                "VerticalFlip",
-                "XYMasking",
-            }  # from https://albumentations.ai/docs/getting_started/transforms_and_targets/#spatial-level-transforms
-
-            # Transforms
-            T = [
-                A.Blur(p=0.01),
-                A.MedianBlur(p=0.01),
-                A.ToGray(p=0.01),
-                A.CLAHE(p=0.01),
-                A.RandomBrightnessContrast(p=0.0),
-                A.RandomGamma(p=0.0),
-                A.ImageCompression(quality_lower=75, p=0.0),
-            ]
-
-            # Compose transforms
-            self.contains_spatial = any(transform.__class__.__name__ in spatial_transforms for transform in T)
-            self.transform = (
-                A.Compose(T, bbox_params=A.BboxParams(format="yolo", label_fields=["class_labels"]))
-                if self.contains_spatial
-                else A.Compose(T)
-            )
-            LOGGER.info(prefix + ", ".join(f"{x}".replace("always_apply=False, ", "") for x in T if x.p))
-        except ImportError:  # package not installed, skip
-            pass
-        except Exception as e:
-            LOGGER.info(f"{prefix}{e}")
+        # Compose transforms
+        self.contains_spatial = any(transform.__class__.__name__ in spatial_transforms for transform in T)
+        self.transform = (
+            A.Compose(T, bbox_params=A.BboxParams(format="yolo", label_fields=["class_labels"]))
+            if self.contains_spatial
+            else A.Compose(T)
+        )
+        LOGGER.info(prefix + ", ".join(f"{x}".replace("always_apply=False, ", "") for x in T if x.p))
 
     def __call__(self, labels):
         """
@@ -2328,7 +2329,13 @@ def v8_transforms(dataset, imgsz, hyp, stretch=False):
         [
             pre_transform,
             MixUp(dataset, pre_transform=pre_transform, p=hyp.mixup),
-            Albumentations(p=1.0),
+            Albumentations(
+                p=1.0,
+                blur_p=hyp.blur_p,
+                blur_limit=hyp.blur_limit,
+                median_blur=hyp.median_blur,
+                median_blur_limit=hyp.median_blur_limit,
+            ),
             RandomHSV(hgain=hyp.hsv_h, sgain=hyp.hsv_s, vgain=hyp.hsv_v),
             RandomFlip(direction="vertical", p=hyp.flipud),
             RandomFlip(direction="horizontal", p=hyp.fliplr, flip_idx=flip_idx),
