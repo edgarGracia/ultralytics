@@ -982,6 +982,7 @@ def plot_images(
     max_subplots: int = 16,
     save: bool = True,
     conf_thres: float = 0.25,
+    show_labels: bool = True,
 ) -> Optional[np.ndarray]:
     """
     Plot image grid with labels, bounding boxes, masks, and keypoints.
@@ -1073,7 +1074,7 @@ def plot_images(
                     color = colors(c)
                     c = names.get(c, c) if names else c
                     if labels or conf[j] > conf_thres:
-                        label = f"{c}" if labels else f"{c} {conf[j]:.1f}"
+                        label = (f"{c}" if labels else f"{c} {conf[j]:.1f}") if show_labels else ""
                         annotator.box_label(box, label, color=color, rotated=is_obb)
 
             elif len(classes):

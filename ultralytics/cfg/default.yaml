@@ -123,5 +123,14 @@ crop_fraction: 1.0 # (float) image crop fraction for classification (0.1-1), 1.0
 # Custom config.yaml ---------------------------------------------------------------------------------------------------
 cfg: # (str, optional) for overriding defaults.yaml
 
-# Tracker settings ------------------------------------------------------------------------------------------------------
+# Tracker settings -----------------------------------------------------------------------------------------------------
 tracker: botsort.yaml # (str) tracker type, choices=[botsort.yaml, bytetrack.yaml]
+
+# Custom parameters ----------------------------------------------------------------------------------------------------
+blur_p: 0.01
+blur_limit: [3, 7]
+median_blur_p: 0.01
+median_blur_limit: 7
+defocus_p: 0
+defocus_radius: [3, 10]
+defocus_alias: [0.1, 0.5]

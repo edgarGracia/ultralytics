@@ -19,7 +19,6 @@ from ultralytics.utils.metrics import bbox_ioa
 from ultralytics.utils.ops import segment2box, xyxyxyxy2xywhr
 from ultralytics.utils.torch_utils import TORCHVISION_0_10, TORCHVISION_0_11, TORCHVISION_0_13
 
-check_version(A.__version__, "1.0.3", hard=True)  # version requirement
 
 DEFAULT_MEAN = (0.0, 0.0, 0.0)
 DEFAULT_STD = (1.0, 1.0, 1.0)
@@ -1763,8 +1762,11 @@ class Albumentations:
         p=1.0,
         blur_p: float = 0.01,
         blur_limit: tuple = (3, 7),
-        median_blur: float = 0.01,
+        median_blur_p: float = 0.01,
         median_blur_limit: float = 7,
+        defocus_p: float = 0,
+        defocus_radius: tuple = (3, 10),
+        defocus_alias: tuple = (0.1, 0.5),
     ):
         """
         Initialize the Albumentations transform object for YOLO bbox formatted parameters.
@@ -1847,7 +1849,8 @@ class Albumentations:
         # Transforms
         T = [
             A.Blur(blur_limit=blur_limit, p=blur_p),
-            A.MedianBlur(blur_limit=median_blur_limit, p=median_blur),
+            A.MedianBlur(blur_limit=median_blur_limit, p=median_blur_p),
+            A.Defocus(radius=defocus_radius, alias_blur=defocus_alias, p=defocus_p),
             A.ToGray(p=0.01),
             A.CLAHE(p=0.01),
             A.RandomBrightnessContrast(p=0.0),
@@ -2333,8 +2336,11 @@ def v8_transforms(dataset, imgsz, hyp, stretch=False):
                 p=1.0,
                 blur_p=hyp.blur_p,
                 blur_limit=hyp.blur_limit,
-                median_blur=hyp.median_blur,
+                median_blur_p=hyp.median_blur_p,
                 median_blur_limit=hyp.median_blur_limit,
+                defocus_p=hyp.defocus_p,
+                defocus_radius=hyp.defocus_radius,
+                defocus_alias=hyp.defocus_alias,
             ),
             RandomHSV(hgain=hyp.hsv_h, sgain=hyp.hsv_s, vgain=hyp.hsv_v),
             RandomFlip(direction="vertical", p=hyp.flipud),

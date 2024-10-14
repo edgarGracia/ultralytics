@@ -422,7 +422,7 @@ class BaseTrainer:
                     )
                     self.run_callbacks("on_batch_end")
                     if self.args.plots and ni in self.plot_idx:
-                        self.plot_training_samples(batch, ni)
+                        self.plot_training_samples(batch, ni, self.args.show_labels)
 
                 self.run_callbacks("on_train_batch_end")
 
@@ -643,7 +643,7 @@ class BaseTrainer:
         return ""
 
     # TODO: may need to put these following functions into callback
-    def plot_training_samples(self, batch, ni):
+    def plot_training_samples(self, batch, ni, show_labels=True):
         """Plots training samples during YOLO training."""
         pass
 

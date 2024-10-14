@@ -120,7 +120,7 @@ class DetectionTrainer(BaseTrainer):
             "Size",
         )
 
-    def plot_training_samples(self, batch, ni):
+    def plot_training_samples(self, batch, ni, show_labels):
         """Plots training samples with their annotations."""
         plot_images(
             images=batch["img"],
@@ -130,6 +130,7 @@ class DetectionTrainer(BaseTrainer):
             paths=batch["im_file"],
             fname=self.save_dir / f"train_batch{ni}.jpg",
             on_plot=self.on_plot,
+            show_labels=show_labels
         )
 
     def plot_metrics(self):
