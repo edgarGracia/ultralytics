@@ -757,13 +757,8 @@ class BaseTrainer:
         return ""
 
     # TODO: may need to put these following functions into callback
-<<<<<<< HEAD
     def plot_training_samples(self, batch, ni, show_labels=True):
         """Plots training samples during YOLO training."""
-=======
-    def plot_training_samples(self, batch, ni):
-        """Plot training samples during YOLO training."""
->>>>>>> 0537be116924fef9ec3a66e4689134a6a59e7dce
         pass
 
     def plot_training_labels(self):

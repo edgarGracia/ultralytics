@@ -1799,7 +1799,6 @@ class Albumentations:
         - Some transforms are applied with very low probability (0.01) by default.
     """
 
-<<<<<<< HEAD
     def __init__(
         self,
         p=1.0,
@@ -1813,10 +1812,6 @@ class Albumentations:
     ):
         """
         Initialize the Albumentations transform object for YOLO bbox formatted parameters.
-=======
-    def __init__(self, p: float = 1.0, transforms: list | None = None) -> None:
-        """Initialize the Albumentations transform object for YOLO bbox formatted parameters.
->>>>>>> 0537be116924fef9ec3a66e4689134a6a59e7dce
 
         This class applies various image augmentations using the Albumentations library, including Blur, Median Blur,
         conversion to grayscale, Contrast Limited Adaptive Histogram Equalization, random changes of brightness and
@@ -1834,7 +1829,6 @@ class Albumentations:
         self.transform = None
         prefix = colorstr("albumentations: ")
 
-<<<<<<< HEAD
         # List of possible spatial transforms
         spatial_transforms = {
             "Affine",
@@ -1899,90 +1893,6 @@ class Albumentations:
             else A.Compose(T)
         )
         LOGGER.info(prefix + ", ".join(f"{x}".replace("always_apply=False, ", "") for x in T if x.p))
-=======
-        try:
-            import os
-
-            os.environ["NO_ALBUMENTATIONS_UPDATE"] = "1"  # suppress Albumentations upgrade message
-            import albumentations as A
-
-            check_version(A.__version__, "1.0.3", hard=True)  # version requirement
-
-            # List of possible spatial transforms
-            spatial_transforms = {
-                "Affine",
-                "BBoxSafeRandomCrop",
-                "CenterCrop",
-                "CoarseDropout",
-                "Crop",
-                "CropAndPad",
-                "CropNonEmptyMaskIfExists",
-                "D4",
-                "ElasticTransform",
-                "Flip",
-                "GridDistortion",
-                "GridDropout",
-                "HorizontalFlip",
-                "Lambda",
-                "LongestMaxSize",
-                "MaskDropout",
-                "MixUp",
-                "Morphological",
-                "NoOp",
-                "OpticalDistortion",
-                "PadIfNeeded",
-                "Perspective",
-                "PiecewiseAffine",
-                "PixelDropout",
-                "RandomCrop",
-                "RandomCropFromBorders",
-                "RandomGridShuffle",
-                "RandomResizedCrop",
-                "RandomRotate90",
-                "RandomScale",
-                "RandomSizedBBoxSafeCrop",
-                "RandomSizedCrop",
-                "Resize",
-                "Rotate",
-                "SafeRotate",
-                "ShiftScaleRotate",
-                "SmallestMaxSize",
-                "Transpose",
-                "VerticalFlip",
-                "XYMasking",
-            }  # from https://albumentations.ai/docs/getting_started/transforms_and_targets/#spatial-level-transforms
-
-            # Transforms, use custom transforms if provided, otherwise use defaults
-            T = (
-                [
-                    A.Blur(p=0.01),
-                    A.MedianBlur(p=0.01),
-                    A.ToGray(p=0.01),
-                    A.CLAHE(p=0.01),
-                    A.RandomBrightnessContrast(p=0.0),
-                    A.RandomGamma(p=0.0),
-                    A.ImageCompression(quality_range=(75, 100), p=0.0),
-                ]
-                if transforms is None
-                else transforms
-            )
-
-            # Compose transforms
-            self.contains_spatial = any(transform.__class__.__name__ in spatial_transforms for transform in T)
-            self.transform = (
-                A.Compose(T, bbox_params=A.BboxParams(format="yolo", label_fields=["class_labels"]))
-                if self.contains_spatial
-                else A.Compose(T)
-            )
-            if hasattr(self.transform, "set_random_seed"):
-                # Required for deterministic transforms in albumentations>=1.4.21
-                self.transform.set_random_seed(torch.initial_seed())
-            LOGGER.info(prefix + ", ".join(f"{x}".replace("always_apply=False, ", "") for x in T if x.p))
-        except ImportError:  # package not installed, skip
-            pass
-        except Exception as e:
-            LOGGER.info(f"{prefix}{e}")
->>>>>>> 0537be116924fef9ec3a66e4689134a6a59e7dce
 
     def __call__(self, labels: dict[str, Any]) -> dict[str, Any]:
         """Apply Albumentations transformations to input labels.
@@ -2534,7 +2444,6 @@ def v8_transforms(dataset, imgsz: int, hyp: IterableSimpleNamespace, stretch: bo
         [
             pre_transform,
             MixUp(dataset, pre_transform=pre_transform, p=hyp.mixup),
-<<<<<<< HEAD
             Albumentations(
                 p=1.0,
                 blur_p=hyp.blur_p,
@@ -2545,10 +2454,6 @@ def v8_transforms(dataset, imgsz: int, hyp: IterableSimpleNamespace, stretch: bo
                 defocus_radius=hyp.defocus_radius,
                 defocus_alias=hyp.defocus_alias,
             ),
-=======
-            CutMix(dataset, pre_transform=pre_transform, p=hyp.cutmix),
-            Albumentations(p=1.0, transforms=getattr(hyp, "augmentations", None)),
->>>>>>> 0537be116924fef9ec3a66e4689134a6a59e7dce
             RandomHSV(hgain=hyp.hsv_h, sgain=hyp.hsv_s, vgain=hyp.hsv_v),
             RandomFlip(direction="vertical", p=hyp.flipud, flip_idx=flip_idx),
             RandomFlip(direction="horizontal", p=hyp.fliplr, flip_idx=flip_idx),

@@ -129,7 +129,6 @@ erasing: 0.4 # (float) random erasing probability for classification (0–0.9), 
 # Custom config.yaml ---------------------------------------------------------------------------------------------------
 cfg: # (str, optional) path to a config.yaml that overrides defaults
 
-<<<<<<< HEAD
 # Tracker settings -----------------------------------------------------------------------------------------------------
 tracker: botsort.yaml # (str) tracker type, choices=[botsort.yaml, bytetrack.yaml]
 
@@ -141,7 +140,3 @@ median_blur_limit: 7
 defocus_p: 0
 defocus_radius: [3, 10]
 defocus_alias: [0.1, 0.5]
-=======
-# Tracker settings ------------------------------------------------------------------------------------------------------
-tracker: botsort.yaml # (str) tracker config file: botsort.yaml or bytetrack.yaml
->>>>>>> 0537be116924fef9ec3a66e4689134a6a59e7dce

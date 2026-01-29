@@ -685,15 +685,10 @@ def plot_images(
     max_subplots: int = 16,
     save: bool = True,
     conf_thres: float = 0.25,
-<<<<<<< HEAD
     show_labels: bool = True,
 ) -> Optional[np.ndarray]:
     """
     Plot image grid with labels, bounding boxes, masks, and keypoints.
-=======
-) -> np.ndarray | None:
-    """Plot image grid with labels, bounding boxes, masks, and keypoints.
->>>>>>> 0537be116924fef9ec3a66e4689134a6a59e7dce
 
     Args:
         labels (dict[str, Any]): Dictionary containing detection data with keys like 'cls', 'bboxes', 'conf', 'masks',
@@ -799,13 +794,8 @@ def plot_images(
                     color = colors(c)
                     c = names.get(c, c) if names else c
                     if labels or conf[j] > conf_thres:
-<<<<<<< HEAD
                         label = (f"{c}" if labels else f"{c} {conf[j]:.1f}") if show_labels else ""
                         annotator.box_label(box, label, color=color, rotated=is_obb)
-=======
-                        label = f"{c}" if labels else f"{c} {conf[j]:.1f}"
-                        annotator.box_label(box, label, color=color)
->>>>>>> 0537be116924fef9ec3a66e4689134a6a59e7dce
 
             elif len(classes):
                 for c in classes:

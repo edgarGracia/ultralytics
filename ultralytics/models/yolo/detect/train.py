@@ -199,18 +199,8 @@ class DetectionTrainer(BaseTrainer):
             "Size",
         )
 
-<<<<<<< HEAD
     def plot_training_samples(self, batch, ni, show_labels):
         """Plots training samples with their annotations."""
-=======
-    def plot_training_samples(self, batch: dict[str, Any], ni: int) -> None:
-        """Plot training samples with their annotations.
-
-        Args:
-            batch (dict[str, Any]): Dictionary containing batch data.
-            ni (int): Number of iterations.
-        """
->>>>>>> 0537be116924fef9ec3a66e4689134a6a59e7dce
         plot_images(
             labels=batch,
             paths=batch["im_file"],
